@@ -1,32 +1,39 @@
-import {useState} from "react"
-import {useNavigate} from "react-router-dom"
+import {useNavigate} from "react-router-dom";
+import {useEffect, useState} from "react";
+import {authFetch} from "../api/authFetch"
 
-function Membership(){
+function AddAdmin(){
 
         const[userId,setUserId] = useState("");
         const[userPassword,setUserPassword] = useState("");
         const[userName,setUserName] = useState("");
         const[userPhoneNumber,setUserPhoneNumber] = useState("");
-
-        const navigate = useNavigate();
         const[error,setError] = useState("");
-
+        const navigate = useNavigate();
+        
+    useEffect(()=>{
+        const fetchAdminData = async ()=>{
+            try{
+                const res = await authFetch(`${import.meta.env.VITE_BACKEND_BASE_URL}/api/admin/test`,{method:"GET",});
+                
+                if(!res || !res.ok){
+                    navigate("/");
+                }
+            }catch(e){
+                console.log(e);
+            }
+        };
+        fetchAdminData();
+    },[]);
 
     const memberShipSubmit = async (e)=>{
         e.preventDefault();
 
-
         try{
-            const response = await fetch(
-                `${import.meta.env.VITE_BACKEND_BASE_URL}/api/auth/membership`,
-                {
-                    method:"POST",
-                    headers:{
-                        "Content-Type":"application/json",
-                    },
-                    body:JSON.stringify({userId,userPassword,userName,userPhoneNumber}),
-                }
-            );
+            const response = await authFetch(`${import.meta.env.VITE_BACKEND_BASE_URL}/api/admin/addAdmin`,{
+                method:"POST",
+                body:JSON.stringify({userId,userPassword,userName,userPhoneNumber}),
+            });
 
             if(!response.ok){
                 const err = await response.json();
@@ -34,17 +41,15 @@ function Membership(){
                 return;
             }
 
-            navigate("/");
-
+            navigate("/admin");
         }catch(err){
             console.log(err);
-            setError("알 수 없는 에러 발생..");
         }
     };
 
     return(
             <div>
-                <h1>회원가입</h1>
+                <h1>관리자 추가</h1>
                 <form onSubmit={memberShipSubmit}>
                     <input style={{marginTop:"20px"}} type="text" value={userId} onChange={(e)=>setUserId(e.target.value)} placeholder={"id"}/><br/>
                     <input style={{marginTop:"20px"}} type="password" value={userPassword} onChange={(e)=>setUserPassword(e.target.value)} placeholder={"password"}/><br/>
@@ -53,6 +58,6 @@ function Membership(){
                     <button style={{marginTop:"20px"}} type="submit">확인</button>
                 </form>
                 {error && <p style={{color:"red"}}>{error}</p>}
-            </div>
+            </div>        
     );
-}export default Membership;
+}export default AddAdmin;

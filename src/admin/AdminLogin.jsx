@@ -27,15 +27,15 @@ function AdminLogin(){
             );
 
             if(!response.ok){
-                message = await response.text();
-                setError(message||"로그인 실패");
+                const err = await response.json();
+                setError(err.error);
                 return;
             }
 
             const data = await response.json();
 
             //서버가 보낸 토큰 저장
-            localStorage.setItem("accessToken",data.token);
+            localStorage.setItem("accessToken",data.accessToken);
             localStorage.setItem("userId",data.userId);
             localStorage.setItem("roles",JSON.stringify(data.roles));
 
